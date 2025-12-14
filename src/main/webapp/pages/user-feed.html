@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Feed - FitPlanHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>💪 FitPlanHub</h1>
+            </div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="user-dashboard.html">My Subscriptions</a>
+                <a href="user-feed.html">My Feed</a>
+                <span id="userGreeting"></span>
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container dashboard">
+        <h2>My Personalized Feed</h2>
+        <p>Plans from trainers you follow</p>
+        
+        <div id="feedContainer" class="plans-grid">
+            <div class="loading">Loading your feed...</div>
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        if (!requireLogin()) {
+
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFeed();
+        });
+
+        async function loadFeed() {
+            const container = document.getElementById('feedContainer');
+            
+            try {
+                const response = await makeAuthenticatedRequest(API_ENDPOINTS.GET_FEED);
+                const data = await response.json();
+                
+                if (data.success && data.feed) {
+                    displayFeed(data.feed);
+                } else {
+                    container.innerHTML = '<p>Your feed is empty. Follow some trainers to see their plans here!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading feed:', error);
+                container.innerHTML = '<p>Error loading feed.</p>';
+            }
+        }
+
+        function displayFeed(plans) {
+            const container = document.getElementById('feedContainer');
+            container.innerHTML = '';
+            
+            if (plans.length === 0) {
+                container.innerHTML = '<p>Your feed is empty. Follow some trainers to see their plans here!</p>';
+                return;
+            }
+            
+            plans.forEach(plan => {
+                const card = document.createElement('div');
+                card.className = 'plan-card';
+                card.innerHTML = `
+                    <h3>${plan.title}</h3>
+                    <p class="plan-trainer">by ${plan.trainerName}</p>
+                    <p class="plan-description">${plan.description}</p>
+                    <p class="plan-price">₹${plan.price}</p>
+                    <p class="plan-duration">${plan.durationDays} days</p>
+                    <button class="btn btn-primary" onclick="subscribeToPlan(${plan.planId})">
+                        Subscribe Now
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        async function subscribeToPlan(planId) {
+            try {
+                const response = await makeAuthenticatedRequest(API_ENDPOINTS.SUBSCRIBE, {
+                    method: 'POST',
+                    body: JSON.stringify({ planId: planId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Successfully subscribed to plan!');
+                    loadFeed();
+                } else {
+                    alert(data.message || 'Subscription failed');
+                }
+            } catch (error) {
+                console.error('Error subscribing:', error);
+                alert('Error subscribing to plan');
+            }
+        }
+    </script>
+</body>
+</html>

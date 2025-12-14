@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Subscriptions - FitPlanHub</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h1>💪 FitPlanHub</h1>
+            </div>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="user-dashboard.html">My Subscriptions</a>
+                <a href="user-feed.html">My Feed</a>
+                <span id="userGreeting"></span>
+                <button id="logoutBtn">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container dashboard">
+        <h2>My Subscribed Plans</h2>
+
+        <div id="subscriptionsContainer" class="plans-grid">
+            <div class="loading">Loading your subscriptions...</div>
+        </div>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        if (!requireLogin()) {
+
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loadSubscriptions();
+        });
+
+        async function loadSubscriptions() {
+            const container = document.getElementById('subscriptionsContainer');
+
+            try {
+                const response = await makeAuthenticatedRequest(API_ENDPOINTS.GET_SUBSCRIPTIONS);
+                const data = await response.json();
+
+                if (data.success && data.subscriptions) {
+                    displaySubscriptions(data.subscriptions);
+                } else {
+                    container.innerHTML = '<p>You haven\'t subscribed to any plans yet.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading subscriptions:', error);
+                container.innerHTML = '<p>Error loading subscriptions.</p>';
+            }
+        }
+
+        function displaySubscriptions(plans) {
+            const container = document.getElementById('subscriptionsContainer');
+            container.innerHTML = '';
+
+            if (plans.length === 0) {
+                container.innerHTML = '<p>You haven\'t subscribed to any plans yet. <a href="../index.html">Browse plans</a></p>';
+                return;
+            }
+
+            plans.forEach(plan => {
+                const card = document.createElement('div');
+                card.className = 'plan-card';
+                card.innerHTML = `
+                    <h3>${plan.title}</h3>
+                    <p class="plan-trainer">by ${plan.trainerName}</p>
+                    <p class="plan-description">${plan.description}</p>
+                    <p class="plan-price">₹${plan.price}</p>
+                    <p class="plan-duration">${plan.durationDays} days</p>
+                    <button class="btn btn-success" disabled>Active Subscription ✓</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+    </script>
+</body>
+
+</html>
