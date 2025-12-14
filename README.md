@@ -1,6 +1,6 @@
-# FitPlanHub
+# FitHub
 
-FitPlanHub is a web application designed to connect fitness trainers with health enthusiasts. The platform allows trainers to share their expertise by creating structured workout plans, while users can easily discover and subscribe to the plans that match their fitness goals.
+FitHub is a web application designed to connect fitness trainers with health enthusiasts. The platform allows trainers to share their expertise by creating structured workout plans, while users can easily discover and subscribe to the plans that match their fitness goals.
 
 ## Project Overview
 
